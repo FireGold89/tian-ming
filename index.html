@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天命八字 - 專業命理分析</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+TC:wght@400;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">天命<span>八字</span></div>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="nav-links">
+                <a href="#home">首頁</a>
+                <a href="#bazi-form">八字排盤</a>
+                <a href="#about">關於天命</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero-section" id="home">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+            <!-- Left Column: Text Content -->
+            <div class="hero-text-group">
+                <h1 class="hero-title">洞悉天機 · 掌握命運</h1>
+                <p class="hero-subtitle">傳統八字智慧與現代科技的完美結合</p>
+            </div>
+
+            <!-- Right Column: Realtime Chart -->
+            <div class="glass-card bazi-realtime-card">
+                <div class="card-header" style="margin-bottom: 1rem; text-align: left;">
+                    <h3><span style="color: var(--lucky-red);">❖</span> 實時天干地支</h3>
+                </div>
+
+                <div class="realtime-container">
+                    <!-- Analog Clock -->
+                    <div class="clock-wrapper">
+                        <div class="analog-clock">
+                            <div class="marker marker-12"></div>
+                            <div class="marker marker-6"></div>
+                            <div class="marker marker-3"></div>
+                            <div class="marker marker-9"></div>
+                            <div class="hand hour-hand" id="hour-hand"></div>
+                            <div class="hand minute-hand" id="minute-hand"></div>
+                            <div class="hand second-hand" id="second-hand"></div>
+                            <div class="clock-center"></div>
+                        </div>
+                    </div>
+
+                    <!-- Live Pillars -->
+                    <div class="live-pillars">
+                        <div class="pillar-group">
+                            <span class="pillar-stem" id="live-year-stem">-</span>
+                            <span class="pillar-branch" id="live-year-branch">-</span>
+                        </div>
+                        <div class="pillar-group">
+                            <span class="pillar-stem" id="live-month-stem">-</span>
+                            <span class="pillar-branch" id="live-month-branch">-</span>
+                        </div>
+                        <div class="pillar-group">
+                            <span class="pillar-stem" id="live-day-stem">-</span>
+                            <span class="pillar-branch" id="live-day-branch">-</span>
+                        </div>
+                        <div class="pillar-group">
+                            <span class="pillar-stem" id="live-hour-stem">-</span>
+                            <span class="pillar-branch" id="live-hour-branch">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Date Info -->
+                <div class="realtime-info">
+                    <div class="time-display">
+                        <div id="current-gregorian-date" class="gregorian-text"></div>
+                        <div id="current-lunar-date" class="lunar-text"></div>
+                    </div>
+                </div>
+
+                <!-- Hourly Pillars List -->
+                <div class="hourly-pillars-section">
+                    <div class="section-divider">今日時辰干支</div>
+                    <div class="hourly-list" id="hourly-list">
+                        <!-- Hourly items will be injected by JS -->
+                    </div>
+                </div>
+
+                <!-- Action Buttons (Moved here for layout optimization) -->
+                <div class="hero-actions-container">
+                    <a href="#bazi-form" class="btn btn-primary">立即排盤</a>
+                    <button id="btn-realtime" class="btn btn-secondary full-width-btn">查看即時局</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="form-section" id="bazi-form">
+        <div class="container">
+            <div class="section-title">
+                <h2>專業排盤</h2>
+                <div class="divider"></div>
+            </div>
+
+            <div class="form-card">
+                <form id="analysis-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="name">姓名 / 暱稱</label>
+                            <input type="text" id="name" placeholder="請輸入姓名">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gender">性別</label>
+                            <select id="gender">
+                                <option value="male">男</option>
+                                <option value="female">女</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="birth-date">出生日期 (公曆)</label>
+                            <input type="date" id="birth-date" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="birth-time">出生時間</label>
+                            <input type="time" id="birth-time" required>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="timezone">出生地時區</label>
+                            <select id="timezone">
+                                <option value="Asia/Taipei">台灣/香港/北京 (UTC+8)</option>
+                                <option value="Asia/Tokyo">日本 (UTC+9)</option>
+                                <option value="America/New_York">紐約 (UTC-5)</option>
+                                <option value="Europe/London">倫敦 (UTC+0)</option>
+                                <!-- More options can be added -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-text">立即排盤</span>
+                            <span class="btn-loading" style="display: none;">
+                                <span class="spinner"></span> 排盤中...
+                            </span>
+                        </button>
+                    </div>
+
+                    <div id="error-message" class="error-message"></div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <section id="results-section" class="results-section" style="display: none;">
+        <div class="container">
+            <div class="section-title">
+                <h2>命造分析</h2>
+                <div class="divider"></div>
+            </div>
+            <div id="results-content" class="results-container">
+                <!-- Results injected here -->
+            </div>
+        </div>
+    </section>
+
+    <section class="features" id="about">
+        <div class="container">
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🌗</div>
+                    <h3>精準節氣</h3>
+                    <p>採用天文算法計算真太陽時與節氣交界，確保排盤精確無誤。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📜</div>
+                    <h3>古籍經典</h3>
+                    <p>融合《三命通會》、《滴天髓》等經典古籍理論，提供正統解讀。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <h3>AI 輔助</h3>
+                    <p>結合現代人工智能技術，提供更客觀、全面的命理分析建議。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2026 天命八字. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
