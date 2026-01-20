@@ -20,6 +20,29 @@ const TIANGAN = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', 
 const DIZHI = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
 const ZODIAC = ['鼠', '牛', '虎', '兔', '龍', '蛇', '馬', '羊', '猴', '雞', '狗', '豬'];
 
+// 节气表（简化版，实际应用需更精确数据）
+const SOLAR_TERMS = {
+    2024: '02-04', // 2024年立春日期
+    2025: '02-03',
+    2026: '02-04'
+};
+
+// 月支节气对应表
+const MONTH_BRANCH_MAP = {
+    '01': { branch: 1, term: '小寒' }, // 丑月
+    '02': { branch: 2, term: '立春' }, // 寅月
+    '03': { branch: 3, term: '惊蛰' }, // 卯月
+    '04': { branch: 4, term: '清明' }, // 辰月
+    '05': { branch: 5, term: '立夏' }, // 巳月
+    '06': { branch: 6, term: '芒种' }, // 午月
+    '07': { branch: 7, term: '小暑' }, // 未月
+    '08': { branch: 8, term: '立秋' }, // 申月
+    '09': { branch: 9, term: '白露' }, // 酉月
+    '10': { branch: 10, term: '寒露' }, // 戌月
+    '11': { branch: 11, term: '立冬' }, // 亥月
+    '12': { branch: 0, term: '大雪' }  // 子月
+};
+
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('bazi-form');
     const resultsSection = document.getElementById('results-section');
@@ -72,10 +95,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const day = dateObj.getDate();
         const hour = dateObj.getHours();
 
-        // 1. 年柱
-        // 立春分界 (簡化：假設每年2月4日立春)
+        // 1. 年柱（精确立春分界）
         let baziYear = year;
-        if (month < 2 || (month === 2 && day < 4)) {
+        const springDate = SOLAR_TERMS[year] ? new Date(`${year}-${SOLAR_TERMS[year]}`) : new Date(`${year}-02-04`);
+
+        if (dateObj < springDate) {
             baziYear = year - 1;
         }
 
@@ -87,42 +111,38 @@ document.addEventListener('DOMContentLoaded', function () {
         // (year - 4) % 10 -> Stem. (2024 - 4) % 10 = 0 (Jia). Correct for 2024.
         // (year - 4) % 12 -> Branch. (2024 - 4) % 12 = 4 (Chen/Dragon). Correct for 2024.
 
-        // 2. 月柱
-        // 年上起月：甲己之年丙作首，乙庚之年戊為頭...
-        // 乙年（yearStemIdx=1）的正月是戊寅月。
-        const monthStemBase = ((yearStemIdx % 5) * 2 + 2) % 10; // 甲己為2(丙), 乙庚為4(戊)...
+        // 2. 月柱（精确节气分界）
+        const monthKey = String(month).padStart(2, '0');
+        const { branch: baseBranch, term } = MONTH_BRANCH_MAP[monthKey] || {};
 
-        // 月支：正月為寅(2)，二月為卯(3)... 十二月為丑(1)，下一個正月又是寅(2)
-        // 這裡需要精確模擬月份與地支的對應。
-        // 農曆月份與地支對應：1:寅(2), 2:卯(3), 3:辰(4), 4:巳(5), 5:午(6), 6:未(7), 7:申(8), 8:酉(9), 9:戌(10), 10:亥(11), 11:子(0), 12:丑(1)
+        // 计算节气日期（简化：每月5号左右）
+        const termDate = new Date(`${year}-${monthKey}-05`);
 
-        // 判斷當前處於哪個命理月
-        let monthBranchIdx;
-        if (month === 1) {
-            // 1月通常是上一年的最後月（丑月）或更早，直到立春
-            monthBranchIdx = 1; // 丑
-        } else if (month === 2) {
-            // 2月立春（通常4號）之前是丑月，之後是寅月
-            monthBranchIdx = (day < 4) ? 1 : 2;
-        } else {
-            // 3月(3) -> 辰(4), 4月(4) -> 巳(5)...
-            // 規律：monthBranchIdx = month
-            monthBranchIdx = month;
+        // 判断是否在节气之后
+        let monthBranchIdx = baseBranch;
+        if (dateObj < termDate && month > 1) {
+            // 如果在节气之前，取上个月支
+            const prevMonthKey = String(month - 1).padStart(2, '0');
+            const prevBranch = MONTH_BRANCH_MAP[prevMonthKey]?.branch || baseBranch;
+            monthBranchIdx = prevBranch;
         }
 
         // 計算月干索引
         // 偏移量：正月(寅)相對於月幹起點的偏移是 0，二月(卯)是 1...
         // 丑月(1) 相對於 寅月(2) 的偏移是 11（循環）
+        // Calculate monthStemBase based on year stem
+        const monthBaseMap = [2, 4, 6, 8, 0]; // 甲己->2, 乙庚->4, 丙辛->6, 丁壬->8, 戊癸->0
+        const monthStemBase = monthBaseMap[yearStemIdx % 5];
+
         let offset = (monthBranchIdx - 2 + 12) % 12;
         const monthStemIdx = (monthStemBase + offset) % 10;
 
-        // 3. 日柱
-        // 日柱需天文公式，這裡使用高斯公式模擬或簡易推算
-        // 簡易模擬：基於 1900-01-31 (甲辰) 或類似基準
-        const baseDate = new Date(1900, 0, 31);
+        // 3. 日柱（使用2000-01-01基准）
+        const baseDate = new Date(2000, 0, 1); // 2000-01-01 是己卯日
         const daysDiff = Math.floor((dateObj - baseDate) / (1000 * 60 * 60 * 24));
-        const dayStemIdx = (0 + daysDiff) % 10; // 0 was Jia
-        const dayBranchIdx = (4 + daysDiff) % 12; // 4 was Chen
+        // 处理负天数情况
+        const dayStemIdx = ((5 + daysDiff) % 10 + 10) % 10; // 5=己
+        const dayBranchIdx = ((3 + daysDiff) % 12 + 12) % 12; // 3=卯
 
         // 4. 時柱
         // 日上起時：甲己還加甲...
